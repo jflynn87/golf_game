@@ -1,0 +1,59 @@
+{%extends 'golf_app/golf_app_base.html'%}
+{%load golf_extras%}
+{%block body_block%}
+
+<table class="table">
+<thead>
+  <th>Tournament</th>
+  {%for user in user_list%}
+  <th>{{user}}</th>
+  {%endfor%}
+  <th>Winner</th>
+  <tr style="background-color: lightblue">
+  <th>Prize $</th>
+  {%for user, prize in prize_list.items%}
+  <td>{{prize|currency}}</td>
+  {%endfor%}
+  <td></td>
+  <tr style="background-color: lightblue">
+  <th>Rank</th>
+  {%for rank in rank_list%}
+  <td>{{rank}}</td>
+  {%endfor%}
+  <td></td>
+  <tr style="background-color: lightblue">
+    <th>Total Points</th>
+    {%for total in totals_list%}
+    <td>{{total}}</td>
+    {%endfor%}
+    <td></td>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+  {%for t, score in display_dict.items%}
+  {%if t == 'totals'%}
+  <td>Totals:</td>
+  {%else%}
+  <td> <a href="{%url 'golf_app:scores' pk=t.pk %}">{{t.name}}</td>
+  {%endif%}
+  {%for s in score%}
+    {%if t != "totals"%}
+      {%if s.score%}
+      <td>{{s.score}}</td>
+      {%endif%}
+      {%if s.username%}
+      <td>{{s.username}}</td>
+      {%endif%}
+    {%else%}
+      <td>{{s}}</td>
+    {%endif%}
+  {%endfor%}
+
+  </tr>
+  {%endfor%}
+</tbody>
+</table>
+
+
+{%endblock body_block%}

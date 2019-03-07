@@ -1,0 +1,67 @@
+{% extends "golf_app/golf_app_base.html" %}
+{%load static%}
+{% block body_block %}
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+
+
+<script type="text/javascript" src="{%static 'golf_app/js/field.js'%}"></script>
+
+{% regroup field_list by group as ordered_field_list %}
+
+    <div class="jumbotron">
+        <h1>Hi, {{user.get_username}}!</h1>
+        <h2>Welcome to the {{tournament.name}}  </h2>
+        <h2>Please make 1 pick for each group below</h2>
+        <form name="random" method="post">
+          {%csrf_token%}
+          <input type="text" name="random" value="random" hidden>
+          <h5>or click for random picks  <input type="submit" class="btn btn-primary" value="Random"> </h5>
+        </form>
+
+
+        {% if error_message %}
+          <div class="alert alert-danger">
+          <h2>{{error_message}}</h2>
+          </div>
+        {%endif%}
+
+        {% for group in ordered_field_list%}
+        <table class="table">
+          <th>Group:  {{group.grouper.number}}</th>
+          <th>Name</th>
+          <th>World Golf Ranking</th>
+          <th>Select</th>
+
+        {% for player in group.list%}
+        <tbody>
+            <tr>
+              <td></td>
+              <td>{{player.playerName}}</td>
+              <td>{{player.currentWGR}}</td>
+              <form method="post">
+              {%csrf_token%}
+              <td> <input id="{{player.pk}}" type="radio" name="{{group.grouper}}" value="{{player.id}}">  </td>
+            </tr>
+          </tbody>
+              {%endfor%}
+          </table>
+
+          {%endfor%}
+
+  <input type="hidden" name="userid" value="{{user.id}}">
+  <input type="submit" class="btn btn-primary" value="Submit">
+</div>
+</form>
+
+<div class="hidden" id='old_picks' hidden>
+  <ul>
+  {%for pick in picks%}
+    <li>{{pick}}</li>
+  {%endfor%}
+  </ul>
+</div>
+
+
+{% endblock %}

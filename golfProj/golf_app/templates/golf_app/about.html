@@ -1,0 +1,37 @@
+{% extends "golf_app/golf_app_base.html" %}
+{% block body_block %}
+<h1>Game Rules and Logic</h1>
+
+<h3>Finances</h3>
+<p>$300 per player.  There are 6 of us, so $1800 total pot.  Weekly winner will get $30 and the app will keep a running point total for the season.  Low score for the full season (last tourney is the Tour Championship as part of the Fed Ex) wins the remaining $480.  Any ties result in a split of the pot for the week/year.</p>
+
+<h3>Weekly Field:</h3>
+<p>Thru the year there are different field sizes, with most tournaments have 156 player.  Groups are created by OWGR for the player.  The group logic works like this</p>
+<ul>
+  <li>For 120 golfers or more – groups 1-5 have 10 golfers, group 6+ have 15.  When there are less than 15 golfers remaining, they are added to the final group (so in a 156 tournament the last group has 16 gofers.  If there are 154 (I don’t think this actually happens) the last group will be 29 golfers).</li>
+  <li>Tournaments with less than 120 players there will be 10 groups, again any odd numbers in the last group.  There are some tournaments with 100 golfers, so they will be 10 x 10.  There are some with 30, they are 10 groups with 3 golfers in each.</li>
+</ul>
+
+<h3>Pick Deadline</h3>
+<p>The deadline is 23:59 the day prior to the tournament start date in Pacific Time.  This works for all US tournament,  for others let’s make sure we get picks in early and I will manually open it up the scoring page once they are all in (this is an issue the next few weeks when tournaments are in Asia as well as for the Open Championship).</p>
+
+<h3>Scoring</h3>
+<ul>
+  <li>Add up the ranks of each selected golfer</li>
+  <li>Any cut golfer gets a rank of the number of players making the cut +1 (in round 1 this is hard coded to 71, in round 2 it is based on the projected cut line so will change as that changes).</li>
+  <li>Note - If more than 78 players make the cut in a standard tournament, there is a second cut on Sat that resets the field to top 70 and ties.  Friday cuts will get a score of the Friday cut number +1.  Sat cuts will get the actual rank in the tournament.  For example, if 80 golfers make the cut on Friday all cut golfers get 81.  If 70 make it after Sat, the 10 golfers who are cut get their actual rank.</li>
+
+</ul>
+
+<h3>Bonus Points</h3>
+<ul>
+  <li>If none of your picks are cut you will get -50 from your score  (this is updated, it was 10 in the majors but since we never had it a bigger bonus seems justified).</li>
+  <li>If you pick the tournament winner you will get a bonus of –(50 + (group x2).  So if somehow your group 15 pick wins the tournament you will get -80.</li>
+</ul>
+
+<h3>Withdrawals</h3>
+<ul>
+  <li>If a pick withdraws after the start of play, that counts as a cut.</li>
+  <li>WD’s before a tournament starts are hard to find.  The app shows it, but not until after all picks are all made and the PGA starts making their score file available (which is close to the tournament start).  My proposal is that we try first to look out for each other when we check the picks each week and let each other know if we see a WD on the score page.  If a replacement is nominated before 10am local time of the tournament we take that pick.  If it is after, the pick will be the golfer ranked at the middle of the group (and if there are multiple golfers, you can pick from them).</li>
+</ul>
+{%endblock%}

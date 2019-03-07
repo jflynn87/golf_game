@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+{%load static%}
+{%load staticfiles%}
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+
+
+      <!-- below here copied to make hamburger work -->
+
+      <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/css/bootstrap.min.css" integrity="sha384-Smlep5jCw/wG7hdkwQ/Z5nLIefveQRIY9nfy6xoR1uRYBtpZgI6339F5dgvm/e9B" crossorigin="anonymous">
+      <!-- Optional theme -->
+      <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous"> -->
+      <link rel="stylesheet" href={%static "fb_app/css/my_style.css" %}>
+      <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+
+
+      <link href="https://fonts.googleapis.com/css?family=Abril+Fatface|Bree+Serif|Markazi+Text|Fira+Sans:100|Lato:300,400" rel="stylesheet">
+
+
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+      <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+      <!-- <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+      <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script> -->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+      <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/js/bootstrap.min.js" integrity="sha384-o+RDsa0aLu++PJvFqy8fFScvbHFLtbvScb8AjopnFD+iEQ7wo/CG0xlczd+2O/em" crossorigin="anonymous"></script>
+    <!-- above here copied to make hamburger work -->
+
+
+    <!-- commented to make hamburger work -->
+    <!-- <meta name="viewport" content="width=device-width, initial-scale=1"> -->
+    <!-- <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous"> -->
+
+
+
+    <link rel="icon" type="image/png" sizes="16x16" href="{%static '/favicon/golf.ico'%}">
+
+    <title>Golf Game!</title>
+  </head>
+  <body>
+    <div class="container">
+        <nav class="navbar navbar-expand-md navbar-light bg-light">
+          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo02" aria-controls="navbarTogglerDemo02" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarTogglerDemo02">
+
+
+          <ul class="navbar-nav mr-auto">
+            <li class="nav-item btn btn-outline-secondary"> <a class='navbar-brand' href="{% url 'index' %}">Home</a>  </li>
+            <li class="nav-item btn btn-outline-secondary"> <a class="navbar-link" href="{% url 'golf_app:field' %}">Make Picks</a> </li>
+            <li class="nav-item btn btn-outline-secondary"> <a class="navbar-link" href="{% url 'golf_app:picks_list'%}">View Picks</a> </li>
+            <li class="nav-item btn btn-outline-secondary"> <a class="navbar-link" href="{% url 'golf_app:scores'%}">Current Week Score</a> </li>
+            <li class="nav-item btn btn-outline-secondary"> <a class="navbar-link" href="{% url 'golf_app:total_score'%}">Total Scores</a> </li>
+            <li class="nav-item btn btn-outline-secondary"> <a class="navbar-link" href="{% url 'golf_app:about'%}">About</a> </li>
+            {% if user.is_authenticated %}
+            <li class="nav-item btn btn-outline-secondary"> <a class="navbar-link" href="{% url 'logout' %}">Logout</a> </li>
+            {%else%}
+            <li class="nav-item btn btn-outline-secondary"> <a class="navbar-link" href="{% url 'login' %}">Login</a> </li>
+            {%endif%}
+          </ul>
+        </div>
+        </nav>
+    </div>
+
+
+    <div class="container">
+          {%block body_block%}
+
+          {%endblock%}
+    </div>
+  </body>
+</html>

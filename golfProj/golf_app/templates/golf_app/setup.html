@@ -1,0 +1,25 @@
+{%extends 'golf_app/golf_app_base.html'%}
+{%block body_block%}
+
+
+<h1>Run Setup</h1>
+
+        {% if error_msg %}
+          <div class="alert alert-danger">
+          <h2>{{error_msg}}</h2>
+          </div>
+
+        {%endif%}
+
+<form  method="post">
+  {%csrf_token%}
+  <label for="tournament_number">PGATour.com Tournament Number:  </label>
+  <input type="text" class="input-group-text" name="tournament_number">
+  <p></p>
+  <p></p>
+  <input type="submit" class="btn btn-primary" value="Run Setup">
+</form>
+
+
+
+{%endblock%}

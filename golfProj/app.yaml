@@ -1,0 +1,26 @@
+# [START django_app]
+runtime: python37
+instance_class: F2
+
+
+env_variables:
+  BUCKET_NAME: "golf-pick-em"
+#api_version: 1
+#threadsafe: yes
+
+handlers:
+- url: /static
+  static_dir: static/collected_static
+- url: /.*
+  script: auto
+
+# Only pure Python libraries can be vendored
+# Python libraries that use C extensions can
+# only be included if they are part of the App Engine SDK
+# Using Third Party Libraries: https://cloud.google.com/appengine/docs/python/tools/using-libraries-python-27
+#libraries:
+#- name: MySQLdb
+#  version: 1.2.5
+#- name: django
+#  version: "1.11"
+# [END django_app]

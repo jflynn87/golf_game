@@ -1,0 +1,157 @@
+{%extends 'golf_app/golf_app_base.html'%}
+{%load golf_extras%}
+
+{%block body_block%}
+<meta http-equiv="refresh" content="120" >
+
+{%if lookup_errors%}
+  <h4>The following picks have withdrawn or have name lookup issues:</h4>
+  {%for key, values in lookup_errors.items%}
+  <p>{{key}}:  {{values}}</p>
+  {%endfor%}
+{%endif%}
+
+
+<h2>{{tournament.name}}</h2>
+
+
+<table class="table table-bordered">
+  <thead class='thead-dark'>
+    <th>Player</th>
+    <th>Score</th>
+    <th># of Cut Picks</th>
+  </thead>
+<tbody>
+{%for player in scores%}
+  <tr>
+    <td>{{player.user}}</td>
+    <td>{{player.score}}</td>
+    <td>{{player.cut_count}}</td>
+  </tr>
+{%endfor%}
+</tbody>
+
+</table>
+<p></p>
+<h3 class="p-3 mb-2 bg-secondary text-white">Tournament Info:</h3>
+<p><a href='https://www.pgatour.com/leaderboard.html' target="_blank">Click for Full Leaderboard</a></p>
+{%for player, score in leader_list.items%}
+
+   <p  style="font-size:100%"> Leader:  {{player}}  : {{score}}</p>
+
+{%endfor%}
+
+{%for status, score in cut_data.items%}
+  {%if status == 'No cut this week'%}
+    <p style="font-size:100%"> {{status}}</p>
+  {%else%}
+    <p style="font-size:100%"> {{status}} cut score is {{score}}</p>
+  {%endif%}
+{%endfor%}
+<p></p>
+<h3 class="p-3 mb-2 bg-secondary text-white">Score  Details</h3>
+<ul class="list-unstyled">
+
+  {%for user, golfers in detail_list.items%}
+  <li class="display-4">{{user}}</li>
+  <table class="table">
+    <thead>
+    <th>Golfer</th>
+    <th>Rank</th>
+    <th>Score to par</th>
+    <th>Current Round Score</th>
+    <th>Start of Day Position</th>
+    </thead>
+    {%for pick in golfers%}
+      {% if pick|model_name == 'score details' %}
+      {%if pick.pick.is_winner%}
+        <tr style="color:red">
+          <td>{{pick.pick.playerName}}</td>
+          <td>{{pick.score}}</td>
+          <td>{{pick.toPar}}</td>
+          {%if pick.today_score in thru_list %}
+            <td>{{pick.today_score}}</td>
+          {%else%}
+            <td>{{pick.today_score}} thru {{pick.thru}} holes</td>
+          {%endif%}
+          <td>{{pick.sod_position}}</td>
+        </tr>
+      {%else%}
+        <tr>
+          <td>{{pick.pick.playerName}}</td>
+          <td>{{pick.score}}</td>
+          <td>{{pick.toPar}}</td>
+          {%if pick.today_score in thru_list %}
+            <td>{{pick.today_score}}</td>
+            <td>{{pick.sod_position}}</td>
+          {%else%}
+            <td>{{pick.today_score}} thru {{pick.thru}} holes</td>
+            <td>{{pick.sod_position}}</td>
+          {%endif%}
+        </tr>
+        {%endif%}
+      {%elif pick|model_name == 'bonus details'%}
+      {%if pick.winner_bonus != 0%}
+      <tr style="color:red">
+          <td>Winner Bonus</td>
+          <td>-{{pick.winner_bonus}}</td>
+        </tr>
+      {%endif%}
+      {%if pick.cut_bonus != 0%}
+        <tr style="color:red">
+          <td>Cut Bonus</td>
+          <td>-{{pick.cut_bonus}}</td>
+        </tr>
+      {%endif%}
+        {%endif%}
+      {%endfor%}
+  </table>
+  {%endfor%}
+</ul>
+<h3 class="p-3 mb-2 bg-secondary text-white">Random Data</h3>
+<h5>Who you should have picked:</h5>
+
+<table class="table">
+  <thead>
+    <th>Group</th>
+    <th>Golfer</th>
+    <th>Position</th>
+  </thead>
+  <tbody>
+    {%for group, player in optimal_picks.items%}
+    <tr>
+      <td>Group: {{group.number}}</td>
+      {%for data in player%}
+      <td>{{data}}</td>
+      {%endfor%}
+    </tr>
+    {%endfor%}
+    <tr>
+      <td>Total</td>
+      <td></td>
+      <td>{{best_score}}</td>
+    </tr>
+  </tbody>
+</table>
+<br>
+<h5>Cuts Per Group:</h5>
+<table class="table">
+  <thead>
+    <th>Group</th>
+    <th>Cuts</th>
+    <th>Group Size</th>
+  </thead>
+  <tbody>
+    {%for g, n in cuts.items%}
+    <tr>
+      <td>Group {{g.number}}:</td>
+      {%for d in n%}
+      <td>{{d}}</td>
+      {%endfor%}
+    </tr>
+    {%endfor%}
+  </tbody>
+</table>
+
+
+{%endblock%}

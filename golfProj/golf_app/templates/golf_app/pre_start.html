@@ -1,0 +1,32 @@
+{%extends 'golf_app/golf_app_base.html'%}
+{%load golf_extras%}
+{%block body_block%}
+
+<h2>{{tournament.name}} Picks Status</h2>
+<h4>Come back on {{tournament.start_date}} PST to see scores</h4>
+<br>
+{%if lookup_errors%}
+{%for user, pick in lookup_errors.items%}
+<h4 style="background-color:red">Pick missing from score file.  Check withdrawals.</h4>
+<ul>
+  <li>{{user}}: {{pick}}</li>
+</ul>
+{%endfor%}
+{%endif%}
+<br>
+<table class="table">
+  <thead style="background-color:lightblue">
+    <th>Player</th>
+    <th>Pick Count</th>
+  </thead>
+    <tbody>
+    {%for user, count in user_dict.items%}
+    <tr>
+      <td>{{user}}</td>
+      <td>{{count}}</td>
+    </tr>
+    {%endfor%}
+    </tbody>
+  </table>
+
+{%endblock%}

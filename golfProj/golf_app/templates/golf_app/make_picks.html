@@ -1,0 +1,38 @@
+{% extends "golf_app/golf_app_base.html" %}
+{% block body_block %}
+{% regroup field_list by group as ordered_field_list %}
+
+<div class="jumbotron">
+
+
+<h1>Picks Form</h1>
+{%if user.is_authenticated%}
+<h2>Please make 1 pick for each group below:  {{tournament.tournament}}</h2>
+{%endif%}
+
+{% for group in ordered_field_list%}
+
+      <form method="post">
+      {%csrf_token%}
+<ul>
+  <li>Group {{group.grouper}}</li>
+
+    {{form}}
+
+
+
+
+
+</ul>
+{%endfor%}
+
+
+
+<input type="hidden" name="userid" value="{{user.id}}">
+<input type="submit" class="btn btn-primary" value="Submit">
+</div>
+</form>
+
+
+</div>
+{%endblock%}
