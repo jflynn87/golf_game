@@ -152,10 +152,10 @@ else:
             'ENGINE': 'django.db.backends.mysql',
             #'HOST': '127.0.0.1',
             # 'PORT': '3306',
-           'NAME':  'games',
+           'NAME':  'jflynn87g$games',
            'USER': os.environ.get('gcp_golf_db_user'),
            'PASSWORD': os.environ.get('gcp_golf_db_password'),
-           'default-character-set': 'utf8',
+           'HOST': 'jflynn87g.mysql.pythonanywhere-services.com'
 
         }
      }
