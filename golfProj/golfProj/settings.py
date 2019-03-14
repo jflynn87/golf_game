@@ -114,10 +114,10 @@ if os.environ.get("DEBUG") != "True":
      DATABASES = {
          'default': {
              'ENGINE': 'django.db.backends.mysql',
-             'HOST': 'jflynn87g$games',
+             'HOST': 'jflynn87g.mysql.pythonanywhere-services.com',
              'USER': os.environ.get('gcp_golf_db_user'),
              'PASSWORD': os.environ.get('gcp_golf_db_password'),
-             'NAME': 'games',
+             'NAME': 'jflynn87g$games',
              'OPTIONS': {
                          'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
                          },
@@ -147,12 +147,9 @@ else:
      DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
-            #'HOST': '127.0.0.1',
-            # 'PORT': '3306',
            'NAME':  'games',
            'USER': os.environ.get('gcp_golf_db_user'),
            'PASSWORD': os.environ.get('gcp_golf_db_password'),
-           #'HOST': 'jflynn87g.mysql.pythonanywhere-services.com',
            'OPTIONS': {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
             },
