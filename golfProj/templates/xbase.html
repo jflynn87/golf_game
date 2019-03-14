@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+{%load staticfiles%}
+{%load static%}
+{% load humanize %}
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/png" sizes="16x16" href="{%static '/golf_app/favicon/golf.ico'%}">
+    <link rel="stylesheet" href={%static "golf_app/css/base.css" %}>
+    <title>Golf Pick 'em</title>
+  </head>
+  <body>
+    <div class="container">
+        <nav class="navbar navbar-default navbar-left">
+          <ul class='navbar nav'>
+            <li><a class="navbar-brand" href="{% url 'index' %}"> <img src="{%static 'golf_app/images/brand.jpg'%}" width="140" height="75" alt=""> </a> </li>
+            {% if user.is_authenticated %}
+            <li> <a class="navbar-link" href="{% url 'golf_app:logout' %}">Logout</a> </li>
+            {%else%}
+            <li> <a class="navbar-link" href="{% url 'login' %}"> <span class="glyphicon glyphicon-user">Login</span></a> </li>
+            {%endif%}
+          </ul>
+        </nav>
+          </div>
+
+    <div class="container">
+          {%block body_block%}
+
+          {%endblock%}
+    </div>
+  </body>
+</html>

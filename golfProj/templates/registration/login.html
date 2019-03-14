@@ -11,15 +11,15 @@
     <label for="password">Password:</label>
     <input type="password" name="password">
 
-    <input type="submit" value="Login">
+    <input type="submit" class='button btn-primary' value="Login">
 
   </form>
   <p></p>
   <p></p>
 
   <p>
-  <a href="{% url 'register' %}"> <button class="btn btn-link">Click here to register</button></a></p>
-
+  <a href="{% url 'golf_app:signup' %}"> <button class="btn btn-primary">Click here to register</button></a></p>
+  <p><a href="{% url 'password_reset' %}"> <button class="btn btn-primary">Reset password</button></a></p>
 </div>
 
 {% endblock %}

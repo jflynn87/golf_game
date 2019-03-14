@@ -25,14 +25,6 @@ STATIC_DIR = os.path.join(BASE_DIR, 'static')
 
 #config_client = runtimeconfig.Client()
 #print (config_client)
-print ('environ', os.environ)
-
-#if os.environ.get('DEBUG') != "True":
-#    METADATA_NETWORK_INTERFACE_URL = \
-#    ('http://metadata/computeMetadata/v1/instance/network-interfaces/0/'
-#     'access-configs/0/external-ip')
-
-
 
 # SECURITY WARNING: keep the secret key used in production secret!
 #print ('environ', os.environ)
@@ -46,7 +38,7 @@ else:
    ## change this to false before going live!
 
 
-ALLOWED_HOSTS = ['127.0.0.1', 'golf-pick-em.appspot.com']
+ALLOWED_HOSTS = ['127.0.0.1', 'golf-pick-em.appspot.com', 'jflynn87g.pythonanywhere.com']
 
 
 # Application definition
@@ -63,6 +55,8 @@ INSTALLED_APPS = [
     'bootstrapform',
     'django.contrib.humanize',
     'golf_app',
+
+
 ]
 
 MIDDLEWARE = [
@@ -120,11 +114,14 @@ if os.environ.get("DEBUG") != "True":
      DATABASES = {
          'default': {
              'ENGINE': 'django.db.backends.mysql',
-             'HOST': 'golf-pick-em:asia-northeast1:golf-pick-em1',
-             #'HOST': '/cloudsql/golf-picks',
+             'HOST': 'jflynn87g$games',
              'USER': os.environ.get('gcp_golf_db_user'),
              'PASSWORD': os.environ.get('gcp_golf_db_password'),
              'NAME': 'games',
+             'OPTIONS': {
+                         'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+                         },
+
          }
      }
 else:
@@ -152,10 +149,13 @@ else:
             'ENGINE': 'django.db.backends.mysql',
             #'HOST': '127.0.0.1',
             # 'PORT': '3306',
-           'NAME':  'jflynn87g$games',
+           'NAME':  'games',
            'USER': os.environ.get('gcp_golf_db_user'),
            'PASSWORD': os.environ.get('gcp_golf_db_password'),
-           'HOST': 'jflynn87g.mysql.pythonanywhere-services.com'
+           #'HOST': 'jflynn87g.mysql.pythonanywhere-services.com',
+           'OPTIONS': {
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+            },
 
         }
      }
@@ -226,6 +226,7 @@ EMAIL_PORT = 587
 
 STATIC_ROOT = STATIC_DIR
 STATIC_ROOT = os.path.join(STATIC_DIR, 'collected_static')
-LOGIN_REDIRECT_URL = '/'
+LOGIN_REDIRECT_URL = 'index'
+LOGOUT_REDIRECT_URL = 'index'
 
 INTERNAL_IPS = ['127.0.0.1']

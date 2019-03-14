@@ -1,0 +1,46 @@
+body html {
+  margin: 0px;
+  padding: 0px;
+}
+
+.backgroundimg {
+  background-image: url('/static/golf_app/images/IMG_1412.JPG');
+  background-size: cover;
+  background-position: left right;
+  background-repeat: no-repeat;
+  height: 60vh;
+  width: 100%;
+  color: black;
+
+}
+
+.pic {
+  padding-left: 3px;
+  height: 250px;
+  width: 222px;
+}
+
+.options {
+  position: relative;
+  color: white;
+  text-align: center;
+}
+
+.bottom-text {
+  position: absolute;
+  bottom: 0px;
+  left: 10px;
+  color: black;
+  font-weight: bolder;
+}
+
+.gray {
+  background-color: lightgray;
+  margin-right: 15px;
+  font-weight: bold
+
+}
+
+.white-text {
+  color: white
+}

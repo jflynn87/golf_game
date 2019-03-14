@@ -16,17 +16,15 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from django.conf.urls import include, url
-from golf_app import views as golf_views
-from base_app import views as main_views
+from golf_app import views
+#from base_app import views as main_views
 from django.conf import settings
-
+from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    url(r'^$', main_views.index,name='index'),
-    url(r'^register/$',main_views.register,name='register'),
-    url(r'^login/$',main_views.user_login,name='login'),
-    url(r'^logout/$',main_views.user_logout,name='logout'),
+    url(r'^$', views.HomePage.as_view(),name='index'),
+    url(r'^', include('django.contrib.auth.urls')),
     url(r'^golf_app/', include('golf_app.urls',namespace='golf_app')),
 
 ]

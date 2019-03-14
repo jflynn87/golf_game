@@ -1,0 +1,24 @@
+{%extends 'base.html'%}
+{%load static%}
+{%block body_block%}
+{%load bootstrap%}
+  <script type="text/javascript" src="{%static 'golf_app/js/league_form.js'%}"></script>
+
+{%if not form.instance.pk%}
+<h1>Create a Group</h1>
+{%else%}
+<h1>Update Group</h1>
+{%endif%}
+<form method="post">
+{%csrf_token%}
+  {{form|bootstrap}}
+
+  <h3>Enter Email Addresses to invite frieds to join your group</h3>
+  {{formset.management_form}}
+  <p>Form Count:  <input type="text" name="" value="{{formset|length}}"</p>
+  {%for invite_form in formset%}
+    <p>{{invite_form|bootstrap}}</p>
+  {%endfor%}
+  <input type="submit" class="btn btn-primary" value="Submit">
+</form>
+{%endblock%}

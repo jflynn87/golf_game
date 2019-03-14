@@ -12,6 +12,44 @@ class Season(models.Model):
     def __str__(self):
         return self.season
 
+class League(models.Model):
+    STAKES_CHOICES = (
+        ('1', "Weekly"),
+        ('2', "Season 50/50"),
+        ('3', "Season 75/25")
+    )
+    league = models.CharField(max_length=100, unique=True)
+    stakes_types = models.CharField(max_length=1,choices=STAKES_CHOICES, null=True)
+    stakes = models.IntegerField(default=0)
+    no_cut_bonus = models.IntegerField(default=-50)
+    winner_bonus = models.IntegerField(default=-50)
+    message = models.CharField(max_length=1000, null=True, blank=True)
+    season = models.ForeignKey(Season, on_delete=models.CASCADE)
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+
+
+    def __str__(self):
+        return self.league
+
+class Invite(models.Model):
+    league = models.ForeignKey(League, on_delete=models.CASCADE, related_name='invite')
+    email_address = models.EmailField()
+    registered = models.BooleanField(default=False)
+    code = models.CharField(max_length=100, null=True)
+
+    def __str__(self):
+        return str (self.email_address)
+
+class Player(models.Model):
+    #invite = models.ForeignKey(Invite, on_delete=models.CASCADE, related_name='player')
+    league = models.ForeignKey(League, on_delete=models.CASCADE, related_name='player')
+    name = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    avatar = models.ImageField(upload_to='static/golf_app/avatar/', null=True, blank=True)
+
+    def __str__(self):
+        return str(self.name)
+
+
 class Tournament(models.Model):
     season = models.ForeignKey(Season, on_delete=models.CASCADE)
     name = models.CharField(max_length=264)

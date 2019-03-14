@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{%load static%}
+{%load staticfiles%}
+{% block body_block %}
+<link rel="stylesheet" href={%static "golf_app/css/index.css" %}>
+  <div class="container">
+
+    <div class="image">
+    <img src="{%static 'golf_app/images/IMG_1412.JPG'%}" alt="" class='img-fluid picture'>
+    <div class="top">
+      <h1>Golf Pick em</h1>
+      <h2>Please select an option</h2>
+
+
+
+    {%if user.is_authenticated%}
+
+    <p></p>
+    <p></p>
+    {% if player%}
+      <a href="{% url 'golf_app:update_league' pk=player.league.pk %}"> <button class="btn btn-primary">Update Group</button></a>
+    {%else%}
+    <a href="{% url 'golf_app:create_league' %}"> <button class="btn btn-primary">Create a Group</button></a>
+    <a href="{% url 'golf_app:join_league' %}"> <button class="btn btn-primary">Join a Group</button></a>
+    {%endif%}
+    <br>
+    <br>
+    <a href="{% url 'golf_app:field' %}"> <button class="btn btn-primary">Make Golf picks</button></a>
+    <a href="{% url 'golf_app:scores'%}"> <button class="btn btn-primary">Current Week Scores</button></a>
+    <a href="{% url 'golf_app:total_score'%}"> <button class="btn btn-primary">Season Totals</button></a>
+    <br>
+    {%else%}
+    <h1>Please Login to access the game</h1>
+    <a href="{% url 'login' %}"> <button class="btn btn-primary">Login</button></a>
+    {%endif%}
+  </div>
+  </div>
+  <div class="bottom">
+    <p>put buttons here </p>
+  </div>
+</div>
+<div class="footer">
+  <p>copyright message</p>
+
+</div>
+
+{% endblock %}

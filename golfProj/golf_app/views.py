@@ -1,7 +1,9 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.generic import View, TemplateView, ListView, DetailView, CreateView, UpdateView, FormView
-from golf_app.models import Field, Tournament, Picks, Group, TotalScore, ScoreDetails
-#from golf_app.forms import  CreatePicksForm, PickFormSet, NoPickFormSet
+from golf_app.models import Field, Tournament, Picks, Group, TotalScore,\
+    ScoreDetails, League, Season, Invite, Player
+from golf_app.forms import  PlayerForm, UserCreateForm, LeagueForm, InviteForm, \
+    InviteFormSet
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.contrib.auth import authenticate, login, logout
@@ -18,6 +20,143 @@ import scipy.stats as ss
 from django.http import JsonResponse
 import json
 import random
+from django.forms.formsets import BaseFormSet
+from django.core.signing import Signer
+from django.db import transaction
+from django.forms.models import model_to_dict
+
+
+class HomePage(TemplateView):
+    template_name='index.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(HomePage, self).get_context_data(**kwargs)
+        if self.request.user.is_authenticated and Player.objects.filter(name=self.request.user).exists():
+            print ('update context')
+            context.update({
+            'player': Player.objects.get(name=self.request.user)
+            })
+        return context
+
+class SignUp(CreateView):
+    form_class = UserCreateForm
+    success_url = reverse_lazy('golf_app:login')
+    template_name = 'golf_app/signup.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(SignUp, self).get_context_data(**kwargs)
+        player = PlayerForm()
+        context.update({
+        'player_form': player
+        })
+        print ('user context', context)
+        return context
+
+class LeagueCreateView(LoginRequiredMixin, CreateView):
+    login_url= 'login'
+    form_class = LeagueForm
+    model = League
+    #success_url = reverse('golf_app:view_league', kwarge={'pk': self.pk})
+
+    #def get_success_url(self, **kwargs):
+    #    object = super(LeagueCreateView, self).get_success_url(**kwargs)
+    #    print (object)
+    #    return reverse('golf_app:view_league', kwarge={'pk': self.pk})
+
+    def get_context_data(self, **kwargs):
+        context = super(LeagueCreateView, self).get_context_data(**kwargs)
+        formset = InviteFormSet()
+        context.update({
+        'formset': formset,
+        })
+        return context
+
+    @transaction.atomic
+    def form_valid(self, form, *args, **kwargs):
+        user = self.request.user
+        invite_form = InviteForm(self.request.POST)
+        print ('form valids', form.is_valid(), invite_form.is_valid())
+        if form.is_valid() and invite_form.is_valid():
+            league_cd = form.cleaned_data
+            invite_cd = invite_form.cleaned_data
+            #season=Season.objects.get(current=True)
+
+            form = form.save(commit=False)
+            form.owner = self.request.user
+            invite_form.save(commit=False)
+            signer = Signer()
+            signed_value = signer.sign(invite_cd.get('email_address'))
+            form.season = Season.objects.get(current=True)
+            print ('form', form)
+            #league = League.objects.get(league=form.cleaned_data.get('league'))
+            form.save()
+            league = League.objects.get(league=league_cd.get('league'))
+            invite = Invite()
+            invite.email_address = invite_cd.get('email_address')
+            invite.league = league
+            invite.code = signed_value.split(':')[1:]
+            invite.save()
+
+            player = Player()
+            player.league = League.objects.get(league=league_cd.get('league'))
+            player.name = self.request.user
+            player.save()
+
+
+            return redirect('golf_app:view_league')
+            return super(LeagueCreateView, self).form_valid(form, *args, **kwargs)
+        else:
+            return super(LeagueCreateView, self).form_invalid(form)
+
+
+
+
+class LeagueView(LoginRequiredMixin, ListView):
+    login_url = 'login'
+    model = League
+    template_name = 'golf_app/view_league.html'
+
+    def get_queryset(self):
+        return League.objects.get(owner=self.request.user)
+
+    def get_context_data(self, **kwargs):
+        context = super(LeagueView, self).get_context_data(**kwargs)
+        user = self.request.user
+        league = League.objects.get(season__current=True, owner=user)
+        invites = Invite.objects.filter(league=league)
+
+        context.update ({
+        #        'league': league,
+                'invites': invites
+        })
+
+        return context
+
+
+class LeagueUpdateView(LoginRequiredMixin, UpdateView):
+    login_url = 'login'
+    form_class = LeagueForm
+    #template_name = 'golf_app/league_form.html'
+    #success_url =
+    model = League
+
+    def get_context_data(self, **kwargs):
+        context = super(LeagueUpdateView, self).get_context_data(**kwargs)
+        formset = InviteFormSet(queryset=Invite.objects.filter(league=League.objects.get(pk=self.kwargs.get('pk'))))
+        context.update({
+        'formset': formset,
+        })
+
+        return context
+
+
+
+class LeagueDeleteView(LoginRequiredMixin, CreateView):
+    pass
+
+
+class JoinLeagueView(UpdateView):
+    pass
 
 
 class FieldListView(LoginRequiredMixin,ListView):

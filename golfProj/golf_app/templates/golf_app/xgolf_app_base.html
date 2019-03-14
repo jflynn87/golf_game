@@ -11,9 +11,9 @@
       <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/css/bootstrap.min.css" integrity="sha384-Smlep5jCw/wG7hdkwQ/Z5nLIefveQRIY9nfy6xoR1uRYBtpZgI6339F5dgvm/e9B" crossorigin="anonymous">
       <!-- Optional theme -->
       <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous"> -->
-      <link rel="stylesheet" href={%static "fb_app/css/my_style.css" %}>
+      <!-- <link rel="stylesheet" href={%static "fb_app/css/my_style.css" %}> -->
       <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-
+      <link rel="stylesheet" href={%static "golf_app/css/base.css" %}>
 
       <link href="https://fonts.googleapis.com/css?family=Abril+Fatface|Bree+Serif|Markazi+Text|Fira+Sans:100|Lato:300,400" rel="stylesheet">
 
@@ -38,7 +38,7 @@
 
 
 
-    <link rel="icon" type="image/png" sizes="16x16" href="{%static '/favicon/golf.ico'%}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{%static '/golf_app/favicon/golf.ico'%}">
 
     <title>Golf Game!</title>
   </head>
@@ -52,6 +52,7 @@
 
 
           <ul class="navbar-nav mr-auto">
+                        <li><a class="navbar-brand" href="{% url 'index' %}"> <img src="{%static 'golf_app/images/brand.jpg'%}" width="140" height="75" alt=""> </a> </li>
             <li class="nav-item btn btn-outline-secondary"> <a class='navbar-brand' href="{% url 'index' %}">Home</a>  </li>
             <li class="nav-item btn btn-outline-secondary"> <a class="navbar-link" href="{% url 'golf_app:field' %}">Make Picks</a> </li>
             <li class="nav-item btn btn-outline-secondary"> <a class="navbar-link" href="{% url 'golf_app:picks_list'%}">View Picks</a> </li>
@@ -66,10 +67,10 @@
           </ul>
         </div>
         </nav>
-    </div>
 
 
-    <div class="container">
+
+
           {%block body_block%}
 
           {%endblock%}
