@@ -1,8 +1,10 @@
-/*body html {
+html header body {
   margin: 0;
   padding: 0;
+  min-width: 100%;
 
 }
+/*
 hr {
       display: block;
       size: 30px;

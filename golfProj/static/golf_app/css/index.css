@@ -1,23 +1,36 @@
-body html {
+body {
   margin: 0px;
   padding: 0px;
+  height: 100vh;
+  min-width: 100%;
 }
+
+html {
+   margin: 0px;
+   height: 100%;
+   width: 100%;
+}
+
 
 .backgroundimg {
   background-image: url('/static/golf_app/images/IMG_1412.JPG');
   background-size: cover;
-  background-position: left right;
+  /*background-position: left right;*/
   background-repeat: no-repeat;
   height: 60vh;
   width: 100%;
   color: black;
+  border: solid gray 2px;
 
 }
 
 .pic {
-  padding-left: 3px;
-  height: 250px;
+  /*padding-left: 3px;*/
+  height: 240px;
   width: 222px;
+  border-radius: 10px;
+  border-style: solid;
+  border-color: black;
 }
 
 .options {
@@ -26,21 +39,61 @@ body html {
   text-align: center;
 }
 
+.white {
+  color: white
+}
+
+.black {
+  color: black
+}
+
+
+.top-text {
+  position: absolute;
+  top: 0px;
+  left: 25%;
+  font-weight: bolder;
+}
+
+
 .bottom-text {
   position: absolute;
   bottom: 0px;
-  left: 10px;
-  color: black;
+  left: 25%;
   font-weight: bolder;
 }
 
 .gray {
   background-color: lightgray;
   margin-right: 15px;
-  font-weight: bold
+  font-weight: bold;
+  text-align: center;
+  border-radius: 5px;
+  padding-left: 10px;
 
 }
 
 .white-text {
   color: white
+}
+
+/*tool tip section*/
+
+
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 120px;
+  background-color: black;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px 0;
+
+  /* Position the tooltip */
+  position: absolute;
+  z-index: 1;
+}
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
 }

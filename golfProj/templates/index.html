@@ -6,9 +6,8 @@
 
 
 <div class="row backgroundimg">
-    <div class="container text-left white-text">
+    <div class="container-fluid text-left white">
       <h1>Welcome to Golf Pick 'em</h1>
-      <h1>Choose an option below)</h1>
     </div>
 </div>
     <div class="row gray">
@@ -29,42 +28,41 @@
         <div class="options">
             <a href="{% url 'golf_app:create_league' %}">
             <img class= "pic" src="{%static 'golf_app/images/group.jpg'%}" alt="background-color:#666;" />
-            <div class="bottom-text">Create Group</div>
+            <div class="top-text white">Create Group</div>
+            <div class="bottom-text white">Create Group</div>
+
             </a>
         </div>
-        <br>
-        <p></p>
+      
         <div class="options">
             <a href="{% url 'golf_app:join_league' %}">
-            <img class= "pic" src="{%static 'golf_app/images/join group.jpg'%}" alt="background-color:#666;" />
-            <div class="bottom-text">Join Group</div>
+            <img class= "pic" src="{%static 'golf_app/images/join-group.jpg'%}" alt="background-color:#666;" />
+            <div class="top-text black">Join Group</div>
+            <div class="bottom-text black">Join Group</div>
             </a>
         </div>
-
-
         {%endif%}
-        <br>
-        <br>
-
         <div class="options">
             <a href="{% url 'golf_app:field' %}">
-            <img class= "pic" src="{%static 'golf_app/images/tee.jpg'%}" alt="background-color:#666;" />
-            <div class="bottom-text">Make Picks</div>
+            <img class= "pic" src="{%static 'golf_app/images/tee.jpg'%}" alt='background-color:#666' />
+            <div class="top-text black">Make Picks</div>
+            <div class="bottom-text white">Make Picks</div>
             </a>
         </div>
 
         <div class="options">
             <a href="{% url 'golf_app:scores' %}">
             <img class= "pic" src="{%static 'golf_app/images/weekly.jpg'%}" alt="background-color:#666;" />
-            <div class="bottom-text">Current Week Scores</div>
+            <div class="top-text white">Current Week Scores</div>
+            <div class="bottom-text white">Current Week Scores</div>
             </a>
         </div>
-
 
         <div class="options">
             <a href="{% url 'golf_app:total_score' %}">
             <img class= "pic" src="{%static 'golf_app/images/season.jpg'%}" alt="background-color:#666;" />
-            <div class="bottom-text">Total Scores</div>
+            <div class="top-text black">Total Scores</div>
+            <div class="bottom-text white">Total Scores</div>
             </a>
         </div>
 
@@ -73,7 +71,12 @@
         <h1>Please Login to access the game</h1>
         <a href="{% url 'login' %}"> <button class="btn btn-primary">Login</button></a>
         {%endif%}
+  </div>
 
+
+  <div class="row gray">
+    <p class="text-center">Game Options - Please select an option above</p>
+    <hr>
   </div>
 
 
