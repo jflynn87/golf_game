@@ -1,18 +1,38 @@
 {% extends 'base.html'%}
-{%block body_block%}
+{%load static%}
 
-<div class="jumbotron">
+{%block body_block%}
+{%load bootstrap%}
+
+<link rel="stylesheet" href={%static "golf_app/css/login.css" %}>
+
+{% if form.errors %}
+{% for error in form.non_field_errors %}
+    <div class="alert alert-danger">
+        <strong>{{ error|escape }}</strong>
+    </div>
+{% endfor %}
+
+{% endif %}
+
+
+<div>
   <h1>Please Login</h1>
   <form method="post" action="{% url 'login'%}">
     {%csrf_token%}
-    <label for="username">Username:</label>
-    <input type="text" name="username" placeholder="Enter Username">
-
-    <label for="password">Password:</label>
-    <input type="password" name="password">
-
+    <table class="table-borderless">
+      <tr>
+        <td class='title'>{{form.username.label}}:</td>
+        <td class='input' style="placeholder:user name;">{{form.username}}</td>
+      </tr>
+      <tr>
+        <td>{{form.password.label}}:</td>
+        <td class='input'>{{form.password}}</td>
+      </tr>
+    </table>
+      <input type="hidden" name="next" value="{{next}}">
+      <p></p>
     <input type="submit" class='button btn-primary' value="Login">
-
   </form>
   <p></p>
   <p></p>

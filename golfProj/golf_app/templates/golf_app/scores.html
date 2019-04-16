@@ -4,6 +4,17 @@
 {%block body_block%}
 <meta http-equiv="refresh" content="120" >
 
+<script type="text/javascript" src="{%static 'golf_app/js/scores.js'%}"></script>
+<link rel="stylesheet" href={%static "golf_app/css/scores.css" %}>
+
+<div class="pace  pace-inactive">
+    <div class="pace-progress" data-progress-text="100%" data-progress="99" style="width: 100%;">
+        <div class="pace-progress-inner"></div>
+    </div>
+    <div class="pace-activity"></div>
+</div>
+
+
 {%if lookup_errors%}
   <h4>The following picks have withdrawn or have name lookup issues:</h4>
   {%for key, values in lookup_errors.items%}

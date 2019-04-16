@@ -10,7 +10,7 @@ from golf_app.calc_score import formatRank
 
 from django.shortcuts import render, get_object_or_404, redirect
 
-def optimal_picks(tournament):
+def optimal_picks(tournament, ranks):
        '''takes no input, loops thru groups to find low scores'''
 
        scores = {}
@@ -20,7 +20,7 @@ def optimal_picks(tournament):
        min_score = {}
 
        tournament=Tournament.objects.get(pk=tournament.pk)
-       ranks = calc_score.getRanks({'pk': tournament.pk})[0]
+       #ranks = calc_score.getRanks({'pk': tournament.pk})[0]
        #field = Field.objects.filter(tournament=tournament)
        #print ('ranks', ranks)
 

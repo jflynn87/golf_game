@@ -6,34 +6,47 @@
 
 
 <div class="row backgroundimg">
-    <div class="container-fluid text-left white">
-      <h1>Welcome to Golf Pick 'em</h1>
+    <div class="xcontainer-fluid text-left white">
+      <h1>{{user.username}} </h1>
+        <h1>Welcome to Golf Pick 'em</h1>
+      <h1>Group: {{player.league.league}}</h1>
     </div>
 </div>
-    <div class="row gray">
 
-      <p>Game Options - Please select an option below</p>
-      <hr>
-    </div>
+<div class="row gray">
+    <p>Game Options - Please select an option below</p>
+    <hr>
+</div>
 
-  <div class="buttonsect row">
-
+  <div class="row">
         {%if user.is_authenticated%}
-
-        <p></p>
-        <p></p>
-        {% if player%}
-          <a href="{% url 'golf_app:update_league' pk=player.league.pk %}"> <button class="btn btn-primary">Update Group</button></a>
+        {% if user == player.league.owner%}
+        <div class="options">
+            <a href="{% url 'golf_app:update_league' pk=player.league.pk %}">
+            <img class= "pic" src="{%static 'golf_app/images/group.jpg'%}" alt="background-color:#666;" />
+            <div class="top-text black">Update Group</div>
+            <div class="bottom-text white">Update Group</div>
+            </a>
+        </div>
+        {%elif player.player.invite.registered%}
+        <div class="options">
+            <a href="{% url 'golf_app:view_league' pk=player.league.pk %}">
+            <img class= "pic" src="{%static 'golf_app/images/group.jpg'%}" alt="background-color:#666;" />
+            <div class="top-text black">View Group</div>
+            <div class="bottom-text white">View Group</div>
+            </a>
+        </div>
         {%else%}
         <div class="options">
             <a href="{% url 'golf_app:create_league' %}">
             <img class= "pic" src="{%static 'golf_app/images/group.jpg'%}" alt="background-color:#666;" />
-            <div class="top-text white">Create Group</div>
+            <div class="top-text black">Create Group</div>
             <div class="bottom-text white">Create Group</div>
-
             </a>
         </div>
-      
+
+        {%endif%}
+
         <div class="options">
             <a href="{% url 'golf_app:join_league' %}">
             <img class= "pic" src="{%static 'golf_app/images/join-group.jpg'%}" alt="background-color:#666;" />
@@ -41,7 +54,7 @@
             <div class="bottom-text black">Join Group</div>
             </a>
         </div>
-        {%endif%}
+
         <div class="options">
             <a href="{% url 'golf_app:field' %}">
             <img class= "pic" src="{%static 'golf_app/images/tee.jpg'%}" alt='background-color:#666' />
@@ -65,11 +78,36 @@
             <div class="bottom-text white">Total Scores</div>
             </a>
         </div>
+        <div class="leaderboard">
+          <h3>Leader Board</h3>
+          <p>put something here.</p>
+          <p>Maybe some links</p>
+          <p>Or league scores, standings</p>
+          <p>Also fix padding and break out display css for big/small screens</p>
+
+        </div>
 
         <br>
         {%else%}
-        <h1>Please Login to access the game</h1>
-        <a href="{% url 'login' %}"> <button class="btn btn-primary">Login</button></a>
+        <!-- <h1>Please Login to access the game</h1>
+        <a href="{% url 'login' %}"> <button class="btn btn-primary">Login</button></a> -->
+
+        <div class="options">
+            <a href="{% url 'login' %}">
+            <img class= "pic" src="{%static 'golf_app/images/login.png'%}" alt="background-color:#666;" />
+            <div class="top-text black">login</div>
+            <div class="bottom-text black">login</div>
+            </a>
+        </div>
+
+        <div class="options">
+            <a href="{% url 'golf_app:join_league' %}">
+            <img class= "pic" src="{%static 'golf_app/images/join-group.jpg'%}" alt="background-color:#666;" />
+            <div class="top-text black">Have a code? Join Group</div>
+            <div class="bottom-text black">Join Group</div>
+            </a>
+        </div>
+
         {%endif%}
   </div>
 

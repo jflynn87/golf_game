@@ -3,22 +3,56 @@
 {%block body_block%}
 {%load bootstrap%}
   <script type="text/javascript" src="{%static 'golf_app/js/league_form.js'%}"></script>
+  <link rel="stylesheet" href={%static "golf_app/css/league_form.css" %}>
+
+
+{%if form.errors%}
+<div class="alert alert-danger">
+  {{form.errors}}
+</div>
+{%endif%}
+
+{%if formset.errors%}
+<div class="alert alert-danger">
+{%for dict in formset.errors%}
+  {%for key, error in dict.items%}
+    <p>{{key}}:  {{error}}</p>
+  {%endfor%}
+{%endfor%}
+</div>
+{%endif%}
 
 {%if not form.instance.pk%}
 <h1>Create a Group</h1>
 {%else%}
 <h1>Update Group</h1>
 {%endif%}
-<form method="post">
+
+<form method="post" enctype="multipart/form-data">
 {%csrf_token%}
   {{form|bootstrap}}
 
   <h3>Enter Email Addresses to invite frieds to join your group</h3>
+<p>Number of Invites:  <input id="email_cnt" type="text" name="" value="{{formset|length}}"</p>
+{%if form.instance.pk%}
+  <button class= 'fas fa-envelope-square btn btn-primary btn-sm' type="button" name="button" onclick='send_email({{form.instance.pk}}, invite="all")'> Resend All Invites</button>
+{%endif%}
   {{formset.management_form}}
-  <p>Form Count:  <input type="text" name="" value="{{formset|length}}"</p>
-  {%for invite_form in formset%}
-    <p>{{invite_form|bootstrap}}</p>
-  {%endfor%}
+  <div id='form_set'>
+  {%for invite_form in formset.forms%}
+    <p id="invite_form-{{invite_form.instance.pk}}">{{invite_form}}
+    {%if invite_form.instance.pk%}
+      <button class= 'fas fa-envelope-square btn btn-primary btn-sm' type="button" name="button" onclick='send_email({{form.instance.pk}}, {{invite_form.instance.pk}})'> Resend Invite</button>
+      {%endif%} </p>
+{%endfor%}
+  </div>
+
+  <div id="empty_form" style="display:none">
+    <p>{{formset.empty_form}}</p>
+
+  </div>
+
   <input type="submit" class="btn btn-primary" value="Submit">
 </form>
+
 {%endblock%}

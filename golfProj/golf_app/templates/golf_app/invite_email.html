@@ -1,0 +1,19 @@
+{% autoescape off %}
+{%load static %}
+
+
+<div class="pic" style='position: relative;'>
+<h3 style='position:absolute; top:10px; left:10px; color:black;'>Welcome to Golf Pick 'em</h3>
+<img style='height:40%px; width:100%;' src="http://jflynn87g.pythonanywhere.com/static/golf_app/images/IMG_4425.jpeg" alt="">
+</div>
+
+
+<p class="red">{{invite.league.owner}} has invited you to join Golf Pick 'em group {{invite.league.league}}.  Click below to join!</p>
+
+<a href="{{ protocol }}://{{ domain }}{% url 'golf_app:signup' token=invite.code %}"><button class='btn btn-primary'>Click to signup!</button></a>
+
+
+<p>Or copy and paste this code into <a href="{{protocol}}://{{domain}}">Golf Pick 'em</a>, code (copy all characters, including brackets):  {{invite.code}}</p>
+
+
+{% endautoescape %}

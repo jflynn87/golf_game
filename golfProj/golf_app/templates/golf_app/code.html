@@ -24,20 +24,15 @@
 <div class="container">
 
   <div class="jumbotron">
-    {%if registered %}
-      <h3>Thank you for registering!</h3>
-      <a href="{% url 'login' %}"> <button class="btn btn-link">Click here to login</button></a></p>
-      {%else%}
-      <h3>Golf Pick 'em Registration</h3>
-      <br>
-      <form method="post" enctype="multipart/form-data">
+      <form  method="post">
         {% csrf_token %}
-        {{form|bootstrap}}>
-        {{player_form|bootstrap}}
+  
+        {{form|bootstrap}}
+        <p></p>
 
-        <input type="submit" class='button btn-primary' name="" value="Register">
+        <input type="submit" class='button btn-primary' name="" value="Enter Code">
       </form>
-      {%endif%}
+
   </div>
 </div>
 {%endblock%}

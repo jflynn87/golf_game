@@ -1,0 +1,57 @@
+{%extends 'base.html'%}
+{%load static%}
+
+
+{%block body_block%}
+
+{% if form.errors %}
+{% for field in form %}
+    {% for error in field.errors %}
+        <div class="alert alert-danger">
+            <strong id="errors">{{ error|escape }}</strong>
+        </div>
+    {% endfor %}
+{% endfor %}
+{% for error in form.non_field_errors %}
+    <div class="alert alert-danger">
+        <strong>{{ error|escape }}</strong>
+    </div>
+{% endfor %}
+{% endif %}
+{%if message%}
+<div class="alert alert-danger">
+    <strong id="errors">{{ message|escape }}</strong>
+</div>
+{%endif%}
+
+
+<table class="table">
+  <thead>
+    <th></th>
+    <th></th>
+    <th></th>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Group Name:</td>
+      <td>{{player.league.league}}</td>
+      <td>one more col</td>
+    </tr>
+    <tr>
+      <td>User Name:</td>
+      <td>{{user.username}}</td>
+      <td><a href="{%url 'golf_app:signup' pk=request.user.pk%}" <button class="btn btn-primary btn-sm type="button" name="button">Update Username/Password</button></a></td>
+    </tr>
+      <tr>
+        <form method="post" enctype="multipart/form-data">
+          {%csrf_token%}
+        <td>{{player_form.avatar.label}}</td>
+        <td>{{player_form.avatar}}</td>
+        <td><button class="btn btn-primary" type="submit" >Update Avatar</button></td>
+        </form>
+      </tr>
+
+  </tbody>
+</table>
+
+{%endblock%}

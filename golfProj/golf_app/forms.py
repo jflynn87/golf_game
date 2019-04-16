@@ -20,19 +20,18 @@ class UserCreateForm(UserCreationForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['username'].label= "Display Name"
+        self.fields['username'].label= "User Name"
         self.fields['email'].label = "Email Address"
         self.fields['email'].help_text = '* Only used if you need to reset your password'
-        self.fields['username'].help_text = '* You can use your real name or a nickname'
+        self.fields['username'].help_text = '* Used to login and will show within your group'
         self.fields['password1'].help_text = "* Password must be 8 characters"
         self.fields['password2'].help_text = "* Enter the same password as before, for verification."
-
 
 class PlayerForm(forms.ModelForm):
 
     class Meta:
         model = Player
-        fields = ['avatar',]
+        fields = ['avatar', ]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -58,6 +57,16 @@ class LeagueForm(forms.ModelForm):
         self.fields['season'].initial = season
         self.fields['season'].widget = forms.HiddenInput()
         self.fields['owner'].widget = forms.HiddenInput()
+        self.fields['owner'].required = False
+
+
+    def clean_stakes(self):
+        stakes = self.cleaned_data['stakes']
+        if stakes <= 0:
+            raise forms.ValidationError('Please enter an amount greater than 0')
+
+        return stakes
+
 
 
 class InviteForm(forms.ModelForm):
@@ -70,10 +79,45 @@ class InviteForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['email_address'].label = ''
         self.fields['email_address'].widget.attrs['placeholder'] = 'name@email.com'
+        self.empty_permitted = True
+        #self.fields['email_address'].required = True
+
+    #def clean_email_address(self):
+    #        email = self.cleaned_data['email_address']
+    #        if email == ' ' or email  == None:
+    #            raise froms.ValidationError("Please enter an email address")
 
 
 
-InviteFormSet = modelformset_factory(Invite, InviteForm, extra=2)
+InviteFormSet = modelformset_factory(Invite, InviteForm, min_num=0, validate_min=True, extra=5)
+UpdateInviteFormSet = modelformset_factory(Invite, InviteForm, min_num=0, validate_min=True, extra=0)
+
+class CodeForm(forms.Form):
+    code = forms.CharField(max_length=100)
+
+    #class Meta:
+    #    model = Invite
+    #    fields = ['code',]
+        #widgets = {
+        #'password': forms.PasswordInput()
+        #}
+
+
+    def clean_code(self):
+        code = self.cleaned_data['code']
+        print (code, len(code), type(code))
+
+        if Invite.objects.filter(code=code).exists():
+            print ('valid code')
+            return code
+        else:
+            raise forms.ValidationError("Please enter a valid cde")
+
+
+    #def __init__(self, *args, **kwargs):
+    #    super().__init__(*args, **kwargs)
+
+
 
 
 #class CreatePicksForm(forms.ModelForm):

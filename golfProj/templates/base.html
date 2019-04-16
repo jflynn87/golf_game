@@ -20,6 +20,7 @@
       <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script> -->
       <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
       <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/js/bootstrap.min.js" integrity="sha384-o+RDsa0aLu++PJvFqy8fFScvbHFLtbvScb8AjopnFD+iEQ7wo/CG0xlczd+2O/em" crossorigin="anonymous"></script>
+      <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
     <!-- above here copied to make hamburger work -->
 
 
@@ -37,11 +38,11 @@
     <link rel="stylesheet" href={%static "golf_app/css/base.css" %}>
 
 
-    <title>Golf Game!</title>
+    <title>Golf Pick 'em</title>
   </head>
   <body>
-    <div class="container">
-        <nav class="navbar navbar-expand-md navbar-light bg-light">
+    <div class="xcontainer">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
           <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo02" aria-controls="navbarTogglerDemo02" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
@@ -57,18 +58,21 @@
             <li class="nav-item btn btn-outline-secondary"> <a class="navbar-link" href="{% url 'golf_app:total_score'%}">Total Scores</a> </li>
             <li class="nav-item btn btn-outline-secondary"> <a class="navbar-link" href="{% url 'golf_app:about'%}">About</a> </li>
             {% if user.is_authenticated %}
+            <li class="nav-item btn btn-outline-secondary"> <a class="navbar-link" href="{% url 'golf_app:user_profile' pk=request.user.pk %}">User Profile</a> </li>
             <li class="nav-item btn btn-outline-secondary"> <a class="navbar-link" href="{% url 'logout' %}">Logout</a> </li>
             {%else%}
             <li class="nav-item btn btn-outline-secondary"> <a class="navbar-link" href="{% url 'login' %}">Login</a> </li>
             {%endif%}
           </ul>
         </div>
+
         </nav>
 
 
 
 
           {%block body_block%}
+
 
           {%endblock%}
     </div>

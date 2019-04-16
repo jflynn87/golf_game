@@ -1,9 +1,62 @@
 {%extends 'base.html'%}
+{%load static%}
+
 
 {%block body_block%}
-<h1>connected</h1>
-{{object_list.league}}
-{%for invite in object_list.invite.all%}
-{{invite.email_address}}
-{%endfor%}
+
+<table class="table">
+  <h2>Your Group has been created.  Please see the details below.</h2>
+  <thead>
+    <th>Option</th>
+    <th>Choice</th>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Group Name</td>
+      <td>{{league.league}}</td>
+    </tr>
+    <tr>
+      <td>Stakes Type</td>
+      <td>{{league.get_stakes_types_display}}</td>
+    </tr>
+    <tr>
+      <td>Stakes Amount</td>
+      <td>{{league.stakes}}</td>
+    </tr>
+    <tr>
+      <td>No Cut Bonus</td>
+      <td>{{league.no_cut_bonus}}</td>
+    </tr>
+    <tr>
+      <td>Winner Bonus</td>
+      <td>{{league.winner_bonus}}</td>
+    </tr>
+    <tr>
+      <td>Message</td>
+      <td>{{league.message}}</td>
+    </tr>
+    <tr>
+      <td>Avatar</td>
+  
+      <td><img src="{%static '/golf_app/'|add:league.avatar.url%}" width="180"></td>
+    </tr>
+  </tbody>
+</table>
+<h2>Group Members:</h2>
+<table class='table'>
+  <thead>
+    <th>Email Address</th>
+    <th>Registered</th>
+
+  </thead>
+  <tbody>
+    {%for invite in invites%}
+    <tr>
+      <td>{{invite.email_address}}</td>
+      <td>{{invite.registered}}</td>
+    </tr>
+    {%endfor%}
+  </tbody>
+</table>
+
 {%endblock%}

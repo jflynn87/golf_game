@@ -1,29 +1,32 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.generic import View, TemplateView, ListView, DetailView, CreateView, UpdateView, FormView
-from golf_app.models import Field, Tournament, Picks, Group, TotalScore,\
-    ScoreDetails, League, Season, Invite, Player
+from golf_app.models import Field, Tournament, Picks, Group, TotalScore, ScoreDetails, mpScores, \
+    League, Season, Invite, Player
 from golf_app.forms import  PlayerForm, UserCreateForm, LeagueForm, InviteForm, \
-    InviteFormSet
+    InviteFormSet, CodeForm, UpdateInviteFormSet
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseRedirect, HttpResponse, Http404
+from django.http import HttpResponseRedirect, HttpResponse, Http404, HttpRequest
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.base import TemplateResponseMixin
 from django.urls import reverse, reverse_lazy
 from django.contrib.auth.models import User
+from django.contrib.auth.forms import UserCreationForm
 import datetime
 from golf_app import populateField, calc_score, optimal_picks
 from django.utils import timezone
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import Min, Q, Count
+from django.db.models import Min, Q, Count, Sum
 import scipy.stats as ss
 from django.http import JsonResponse
 import json
 import random
-from django.forms.formsets import BaseFormSet
-from django.core.signing import Signer
 from django.db import transaction
 from django.forms.models import model_to_dict
+from django.core.signing import Signer
+from golfProj import settings
+from django.template.loader import render_to_string
+from django.core.mail import send_mail, EmailMultiAlternatives, EmailMessage
 
 
 class HomePage(TemplateView):
@@ -31,6 +34,7 @@ class HomePage(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(HomePage, self).get_context_data(**kwargs)
+        #user = User.objects.get(username=self.request.user)
         if self.request.user.is_authenticated and Player.objects.filter(name=self.request.user).exists():
             print ('update context')
             context.update({
@@ -40,28 +44,89 @@ class HomePage(TemplateView):
 
 class SignUp(CreateView):
     form_class = UserCreateForm
-    success_url = reverse_lazy('golf_app:login')
+    #success_url = 'index'
     template_name = 'golf_app/signup.html'
 
     def get_context_data(self, **kwargs):
+        if self.kwargs.get('token') != None:
+            invite = Invite.objects.get(code=self.kwargs.get('token'))
+            data = {'email': invite.email_address}
+            form = UserCreateForm(initial=data)
+            player_form = PlayerForm()
+        elif self.kwargs.get('pk') != None:
+            user = User.objects.get(pk=self.kwargs.get('pk'))
+            print (user.password)
+            player = Player.objects.get(name=self.request.user)
+            player_form = PlayerForm(initial={'avatar': player.avatar})
+            form = UserCreateForm(initial={'username': user.username,
+                            'password1': user.password,
+                            'password2': user.password,
+                            'email': player.email,
+                            })
+        else:
+            form = UserCreateForm()
+            player_form = PlayerForm()
         context = super(SignUp, self).get_context_data(**kwargs)
-        player = PlayerForm()
         context.update({
-        'player_form': player
+        'form': form,
+        'player_form': player_form
         })
-        print ('user context', context)
+
         return context
+
+    def form_invalid(self, form, *args, **kwargs):
+        print ('form invalid', form.errors)
+        print (self.request.FILES)
+        player = PlayerForm(self.request.POST)
+        print ('player', player['avatar'])
+        return render (self.request, 'golf_app/signup.html', {
+                                'form': form,
+                                'player_form': player,
+        })
+
+    @transaction.atomic
+    def form_valid(self, form, *args, **kwargs):
+        print (self.request.FILES)
+        user_form = UserCreationForm(self.request.POST)
+        player_form = PlayerForm(self.request.FILES)
+        print ('player form', player_form)
+        if user_form.is_valid() and player_form.is_valid():
+            user = user_form.save()
+
+            #if the user has an invite, the token will be presnt,
+            #if not the invite will be created when creating a league
+            #need to add logic for dulpicates and out of order registration
+
+            if self.kwargs.get('token') != None:
+                invite = Invite.objects.get(code=self.kwargs.get('token'))
+                invite.registered=True
+                invite.save()
+                #cd = player_form.cleaned_data
+                #player = Player()
+                player = player_form.save(commit=False)
+                player.invite = invite
+                player.league = invite.league
+                player.name = user
+                player.avatar = self.request.FILES
+                print (player)
+                player.save()
+
+            login(self.request, user)
+
+            return HttpResponseRedirect(reverse_lazy('index'))
+
+        else:
+            print ('in form_invalid')
+            return render (request, 'golf_app/signup.html', {
+                                    'form': user_form,
+                                    'player_form': player_form,
+            })
+
 
 class LeagueCreateView(LoginRequiredMixin, CreateView):
     login_url= 'login'
     form_class = LeagueForm
     model = League
-    #success_url = reverse('golf_app:view_league', kwarge={'pk': self.pk})
-
-    #def get_success_url(self, **kwargs):
-    #    object = super(LeagueCreateView, self).get_success_url(**kwargs)
-    #    print (object)
-    #    return reverse('golf_app:view_league', kwarge={'pk': self.pk})
 
     def get_context_data(self, **kwargs):
         context = super(LeagueCreateView, self).get_context_data(**kwargs)
@@ -71,59 +136,159 @@ class LeagueCreateView(LoginRequiredMixin, CreateView):
         })
         return context
 
-    @transaction.atomic
     def form_valid(self, form, *args, **kwargs):
-        user = self.request.user
-        invite_form = InviteForm(self.request.POST)
-        print ('form valids', form.is_valid(), invite_form.is_valid())
-        if form.is_valid() and invite_form.is_valid():
-            league_cd = form.cleaned_data
-            invite_cd = invite_form.cleaned_data
-            #season=Season.objects.get(current=True)
+        save = save_league_data(self.request, form, *args, **kwargs)
 
-            form = form.save(commit=False)
-            form.owner = self.request.user
-            invite_form.save(commit=False)
-            signer = Signer()
-            signed_value = signer.sign(invite_cd.get('email_address'))
-            form.season = Season.objects.get(current=True)
-            print ('form', form)
-            #league = League.objects.get(league=form.cleaned_data.get('league'))
-            form.save()
-            league = League.objects.get(league=league_cd.get('league'))
-            invite = Invite()
-            invite.email_address = invite_cd.get('email_address')
-            invite.league = league
-            invite.code = signed_value.split(':')[1:]
-            invite.save()
+        if save[0] == 'success':
 
-            player = Player()
-            player.league = League.objects.get(league=league_cd.get('league'))
-            player.name = self.request.user
-            player.save()
-
-
-            return redirect('golf_app:view_league')
-            return super(LeagueCreateView, self).form_valid(form, *args, **kwargs)
+            return redirect('golf_app:view_league', pk=save[1].pk)
         else:
-            return super(LeagueCreateView, self).form_invalid(form)
+            print ('formset errors', invite_form_set.errors)
+            return super(LeagueCreateView, self, save[1]).form_invalid(form)
+
+
+class LeagueUpdateView(LoginRequiredMixin, UpdateView):
+    login_url = 'login'
+    form_class = LeagueForm
+    model = League
+
+    def get_context_data(self, **kwargs):
+        context = super(LeagueUpdateView, self).get_context_data(**kwargs)
+        formset = UpdateInviteFormSet(queryset=Invite.objects.filter(league=League.objects.get(pk=self.kwargs.get('pk'))))
+        context.update({
+        'formset': formset,
+        })
+
+        return context
+
+    def form_valid(self, form, *args, **kwargs):
+        print (form)
+        save = save_league_data(self.request, form, *args, **kwargs)
+
+        if save[0] == 'success':
+            return redirect('golf_app:view_league', pk=save[1].pk)
+        else:
+            print ('formset errors', invite_form_set.errors)
+            return super(LeagueUpdateView, self, save[1]).form_invalid(form)
+
+
+class LeagueDeleteView(LoginRequiredMixin, CreateView):
+    pass
 
 
 
+@transaction.atomic
+def save_league_data(view_object, form, *args, **kwargs):
+    '''called from create and update leagues to avoid duplication.  takes a request \
+    object, league form and args. returns a tuple with a success/fail string in index [0] \
+    and a league object if successful or the invite formset if not in index [1]'''
 
-class LeagueView(LoginRequiredMixin, ListView):
+    user = view_object.user
+    invite_form_set = InviteFormSet(view_object.POST)
+    print ('form valids', form.is_valid(), invite_form_set.is_valid())
+    if form.is_valid() and invite_form_set.is_valid():
+        league_cd = form.cleaned_data
+
+        form = form.save(commit=False)
+        form.owner = user
+        form.season = Season.objects.get(current=True)
+        print ('form', form.avatar)
+        form.save()
+
+        league = League.objects.get(league=league_cd.get('league'))
+        invite_list = []
+        for invite_form in invite_form_set:
+            if invite_form.has_changed():
+                invite_cd = invite_form.cleaned_data
+                invite = Invite()
+                invite.email_address = invite_cd.get('email_address')
+                invite.league = league
+                signer = Signer()
+                signed_value = signer.sign(invite_cd.get('email_address'))
+                invite.code = signed_value.split(':')[1:]
+                invite.save()
+                invite_list.append(invite)
+
+        player, created = Player.objects.get_or_create(league=league, name=view_object.user)
+        player.email = user.email
+        player.save()
+
+        print (view_object.get_host())
+        if len(invite_list) > 0:
+            send_invites(view_object, invite_list)
+
+        return 'success', league
+    else:
+        return 'fail', invite_form_set
+
+
+def send_invites(request, invites):
+    '''takes a request and a dict of invite id's and email addresses'''
+
+    print ('invites', invites)
+
+    domain = request.get_host()
+    protocol = request.scheme
+
+    dir = settings.BASE_DIR + '/golf_app/templates/golf_app/'
+
+    for invite in invites:
+        print (invite.code, type(invite.code))
+        msg_plain = render_to_string(dir + 'email.txt', {'invite': invite})
+        msg_html = render_to_string(dir + 'invite_email.html', {'protocol': protocol,
+                                                    'domain': domain,
+                                                    'invite': invite})
+        print(msg_html)
+        send_mail("Welcome to golf pick 'em " + 'Group:  ' +  str(invite.league.league),
+        msg_plain,
+        "jflynn87g@gmail.com",
+        [invite.email_address],
+        html_message=msg_html,
+        )
+
+    return
+
+
+def ajax_resend_invites(request):
+    '''used by ajax requests, takes a request determines what invites to resend'''
+
+    if request.is_ajax():
+        invite_list = []
+        data = request.POST
+        invite_json_list = json.loads(data['invite_list'])
+        i = 0
+
+        while i < len(invite_json_list):
+            invite = Invite.objects.get(pk=invite_json_list[i])
+            # check if email updated on web page in resend
+            if invite.email_address != invite_json_list[i+1]:
+                invite.email_address = invite_json_list[i+1]
+                invite.save()
+            invite_list.append(invite)
+            i += 2
+
+        send_invites(request, invite_list)
+
+        return HttpResponse(json.dumps(data), content_type="application/json")
+    else:
+        print ('bad request ajax_resend_invites')
+        raise Http404
+
+
+
+class LeagueView(LoginRequiredMixin, DetailView):
     login_url = 'login'
     model = League
     template_name = 'golf_app/view_league.html'
 
-    def get_queryset(self):
-        return League.objects.get(owner=self.request.user)
+    #def get_queryset(self):
+    #    return League.objects.get(owner=self.request.user)
 
     def get_context_data(self, **kwargs):
         context = super(LeagueView, self).get_context_data(**kwargs)
         user = self.request.user
-        league = League.objects.get(season__current=True, owner=user)
-        invites = Invite.objects.filter(league=league)
+        #league = League.objects.get(season__current=True, owner=user)
+        invites = Invite.objects.filter(league=League.objects.get(pk=self.kwargs.get('pk')))
 
         context.update ({
         #        'league': league,
@@ -133,30 +298,61 @@ class LeagueView(LoginRequiredMixin, ListView):
         return context
 
 
-class LeagueUpdateView(LoginRequiredMixin, UpdateView):
+class JoinLeagueView(LoginRequiredMixin, FormView):
     login_url = 'login'
-    form_class = LeagueForm
-    #template_name = 'golf_app/league_form.html'
-    #success_url =
-    model = League
+    #redirect_field_name = 'next'
+    template_name = 'golf_app/code.html'
+    form_class = CodeForm
+    #model = Invite
+
+    #def get_redirect_field_name(self):
+    #    return 'golf_app/join_league'
+
+    def form_valid(self, form, **kwargs):
+
+        if form.is_valid():
+            return redirect('golf_app:signup', token=form.cleaned_data.get('code'))
+        else:
+            return super(JoinLeagueView, self).form_valid(form)
+
+class UserProfile(LoginRequiredMixin, TemplateView):
+    login_url = 'login'
+    template_name = 'golf_app/user_profile.html'
 
     def get_context_data(self, **kwargs):
-        context = super(LeagueUpdateView, self).get_context_data(**kwargs)
-        formset = InviteFormSet(queryset=Invite.objects.filter(league=League.objects.get(pk=self.kwargs.get('pk'))))
-        context.update({
-        'formset': formset,
-        })
+        context = super(UserProfile, self).get_context_data(**kwargs)
+        user = User.objects.get(pk=self.request.user.pk)
+        player = Player.objects.get(name=user)
+        player_form = PlayerForm(initial={'avatar': player.avatar})
 
+        context.update({
+        'user': user,
+        'player_form': player_form,
+        'player': player
+        })
         return context
 
+    def post(self, request, **kwargs):
+        print (self.request.FILES)
+        #player_form = PlayerForm(self.request.FILES)
+        #if player_form.is_valid():
+        player = Player.objects.get(name=request.user)
+        player.avatar = self.request.FILES.get('avatar')
+
+        player.save()
+        player_form = PlayerForm(initial={'avatar': player.avatar})
+        message = "Updates Successful"
+        return render(request, 'golf_app/user_profile.html', {
+                                        'user': self.request.user,
+                                        'player_form': player_form,
+                                        'player': player,
+                                        'message': message,
+            })
+        #else:
+        #    print ('bad form')
+        #return super(UserProfile, self).post(request, **kwargs)
 
 
-class LeagueDeleteView(LoginRequiredMixin, CreateView):
-    pass
-
-
-class JoinLeagueView(UpdateView):
-    pass
 
 
 class FieldListView(LoginRequiredMixin,ListView):
@@ -179,7 +375,10 @@ class FieldListView(LoginRequiredMixin,ListView):
                     wd_list.append(golfer.playerName)
                     print ('wd list', wd_list)
             if len(wd_list) > 0:
-                error_message = 'Caution, the following golfers have withdrawn:' + str(wd_list)
+                error_message = 'The following golfers have withdrawn:' + str(wd_list)
+                for wd in wd_list:
+                    Field.objects.filter(tournament=tournament, playerName=wd).update(withdrawn=True)
+
             else:
                 error_message = None
         except Exception as e:
@@ -193,7 +392,7 @@ class FieldListView(LoginRequiredMixin,ListView):
         })
         return context
 
-
+    @transaction.atomic
     def post(self, request):
         tournament = Tournament.objects.get(current=True)
         group = Group.objects.filter(tournament=tournament)
@@ -210,7 +409,7 @@ class FieldListView(LoginRequiredMixin,ListView):
 
         if request.POST.get('random') == 'random':
             for g in group:
-                random_picks.append(random.choice(Field.objects.filter(tournament=tournament, group=g)))
+                random_picks.append(random.choice(Field.objects.filter(tournament=tournament, group=g, withdrawn=False)))
             print ('random picks', random_picks)
         else:
             form = request.POST
@@ -300,49 +499,72 @@ class ScoreListView(DetailView):
         if kwargs.get('pk') == None:
             tournament = Tournament.objects.get(current=True)
             self.kwargs['pk'] = str(tournament.pk)
-        print ('dispatch', self.kwargs)
         return super(ScoreListView, self).dispatch(request, *args, **kwargs)
 
     def get(self, request, **kwargs):
 
         no_thru_display = ['cut', 'mdf', 'not started']
 
-        try:
-            tournament = Tournament.objects.get(pk=self.kwargs.get('pk'))
-            start_time = datetime.datetime.now()
-            if datetime.date.today() >= tournament.start_date:
-                scores = calc_score.calc_score(self.kwargs, request)
-                end_time= datetime.datetime.now()
-                summary_data = optimal_picks.optimal_picks(tournament)
-                print('sum', summary_data)
-                print ('exec time: ', start_time, end_time, end_time-start_time)
+        #try:
+        tournament = Tournament.objects.get(pk=self.kwargs.get('pk'))
+        start_time = datetime.datetime.now()
+        if datetime.date.today() >= tournament.start_date:
+                if tournament.pga_tournament_num != '470': #special logic for match play
+                    scores = calc_score.calc_score(self.kwargs, request)
+                    calc_finish = datetime.datetime.now()
+                    print ('calc time', calc_finish - start_time)
+                    summary_data = optimal_picks.optimal_picks(tournament, scores[5])
+                    print ('summary time', datetime.datetime.now() - calc_finish)
+                    #print('sum', summary_data)
+                    #print ('exec time: ', start_time, end_time, end_time-start_time, self.request.user)
+                    end_time= datetime.datetime.now()
+                    print ('exec time: ', end_time-start_time, self.request.user)
 
-                return render(request, 'golf_app/scores.html', {'scores':scores[0],
-                                                            'detail_list':scores[1],
-                                                            'leader_list':scores[2],
-                                                            'cut_data':scores[3],
-                                                            'lookup_errors': scores[4],
+                    return render(request, 'golf_app/scores.html', {'scores':scores[0],
+                                                                'detail_list':scores[1],
+                                                                'leader_list':scores[2],
+                                                                'cut_data':scores[3],
+                                                                'lookup_errors': scores[4],
+                                                                'tournament': tournament,
+                                                                'thru_list': no_thru_display,
+                                                                'optimal_picks': summary_data[0],
+                                                                'best_score': summary_data[1],
+                                                                'cuts': summary_data[2]
+                                                                })
+                else:
+                # special logic for match play
+                    from golf_app import mp_calc_scores
+                    if not tournament.complete:
+                        mp_calc_scores.mp_calc_scores(tournament, request)
+                    picks = Picks.objects.filter(playerName__tournament=tournament)
+                    scores = mpScores.objects.filter(player__tournament=tournament)
+                    score_details = ScoreDetails.objects.filter(pick__playerName__tournament=tournament).order_by('user')
+                    #score = ScoreDetails.objects.filter(pick__playerName__tournament=tournament).values('user__username').annotate(score=Sum('score')).order_by('score')
+                    return render(request, 'golf_app/mp_picks.html', {
+                                                            'picks': picks,
+                                                            'scores': scores,
                                                             'tournament': tournament,
-                                                            'thru_list': no_thru_display,
-                                                            'optimal_picks': summary_data[0],
-                                                            'best_score': summary_data[1],
-                                                            'cuts': summary_data[2]
-                                                            })
-            else:
+                                                            'score_details': score_details,
+                                                            'total_score': TotalScore.objects.filter(tournament=tournament).order_by('score')
+                    })
+
+        else:
                 tournament = Tournament.objects.get(current=True)
                 user_dict = {}
                 for user in Picks.objects.filter(playerName__tournament=tournament).values('user__username').annotate(Count('playerName')):
                     user_dict[user.get('user__username')]=user.get('playerName__count')
-                scores=calc_score.calc_score(self.kwargs, request)
+                if tournament.pga_tournament_num == '470': #special logic for match player
+                    scores = (None, None, None, None,None)
+                else:  scores=calc_score.calc_score(self.kwargs, request)
                 print ('lookup_errors', scores[4])
                 return render(request, 'golf_app/pre_start.html', {'user_dict': user_dict,
                                                                 'tournament': tournament,
                                                                 'lookup_errors': scores[4],
                                                                 'thru_list': no_thru_display
                                                                 })
-        except Exception as e:
-            print ('score error msg:', e)
-            return HttpResponse("Error, please come back closer to the tournament start or Line John to tell him something is broken.")
+        #except Exception as e:
+        #    print ('score error msg:', e)
+        #    return HttpResponse("Error, please come back closer to the tournament start or Line John to tell him something is broken.")
 
 
 class SeasonTotalView(ListView):
@@ -355,19 +577,30 @@ class SeasonTotalView(ListView):
         winner_dict = {}
         winner_list = []
         total_scores = {}
+        second_half_scores = {}
+        mark_date = datetime.datetime.strptime('2019-3-20', '%Y-%m-%d')
 
         for user in TotalScore.objects.values('user_id').distinct().order_by('user_id'):
             user_key = user.get('user_id')
             user_list.append(User.objects.get(pk=user_key))
             winner_dict[User.objects.get(pk=user_key)]=0
             total_scores[User.objects.get(pk=user_key)]=0
+            #added second half for Mark
+            second_half_scores[User.objects.get(pk=user_key)]=0
 
-        for tournament in Tournament.objects.filter(season__current=True):
+        for tournament in Tournament.objects.filter(season__current=True).order_by('-start_date'):
             score_list = []
+            #second_half_score_list = []  #added for Mark
             for score in TotalScore.objects.filter(tournament=tournament).order_by('user_id'):
                 score_list.append(score)
                 total_score = total_scores.get(score.user)
                 total_scores[score.user] = total_score + score.score
+                #add second half for Mark
+                if tournament.start_date > mark_date.date():
+                    #second_half_score_list.append(score)
+                    second_half_score = second_half_scores.get(score.user)
+                    second_half_scores[score.user] = second_half_score + score.score
+
             if tournament.complete:
                 winner = TotalScore.objects.filter(tournament=tournament).order_by('score').values('score')
                 winning_score = winner[0].get('score')
@@ -380,14 +613,12 @@ class SeasonTotalView(ListView):
                     score_list.append(User.objects.get(pk=winner_data[0][0].user.pk))
                     winner_data = (win_user_list, num_of_winners)
                     winner_list.append(winner_data)
-                    print ('win1', winner_list)
                 elif num_of_winners > 1:
                     winner_data = ([TotalScore.objects.filter(tournament=tournament, score=winning_score)], num_of_winners)
                     #win_user_list = []
                     for user in winner_data[0]:
                         print ('this', user)
                         for name in user:
-                            print ('this 2', name)
                         #score_list.append(User.objects.get(pk=name.user.pk))
                             win_user_list.append(User.objects.get(pk=name.user.pk))
                             winner_data = (win_user_list, num_of_winners)
@@ -402,29 +633,41 @@ class SeasonTotalView(ListView):
         #for user in TotalScore.objects.values('user').distinct().order_by('user_id'):
         #    winner_dict[(User.objects.get(pk=user.get('user')))]=0
 
-        print ('this 4', winner_list)
+
         for winner in winner_list:
             for data in winner[0]:
-                print ('this 3', winner[1])
                 prize = winner_dict.get(data)
                 prize = prize + (30/winner[1])
                 winner_dict[data] = prize
 
         total_score_list = []
+        total_second_half_score_list = []
         for score in total_scores.values():
+            #print ('fh', total_score_list)
             total_score_list.append(score)
-        #display_dict['totals']=total_score_list
+        #added for Mark
+        for s in second_half_scores.values():
+            #print ('sh', second_half_score_list)
+            total_second_half_score_list.append(s)
 
         ranks = ss.rankdata(total_score_list, method='min')
         rank_list = []
         for rank in ranks:
             rank_list.append(rank)
 
+        second_half_ranks = ss.rankdata(total_second_half_score_list, method='min')
+        second_half_rank_list = []
+        for rank in second_half_ranks:
+            second_half_rank_list.append(rank)
 
-        print ('display_dict')
-        print (display_dict)
-        print ('winner dict')
-        print (winner_dict)
+
+
+        print ()
+        print ('display_dict', display_dict)
+        print ()
+        print ('winner dict', winner_dict)
+        print ('second half totals', total_second_half_score_list)
+        print ('full season totals',total_score_list)
 
         context = super(SeasonTotalView, self).get_context_data(**kwargs)
         context.update({
@@ -432,7 +675,9 @@ class SeasonTotalView(ListView):
         'user_list': user_list,
         'rank_list': rank_list,
         'totals_list': total_score_list,
+        'second_half_list': total_second_half_score_list,
         'prize_list': winner_dict,
+        'second_half_rank_list': second_half_rank_list,
 
         })
         return context

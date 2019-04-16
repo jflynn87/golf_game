@@ -26,6 +26,7 @@ class League(models.Model):
     message = models.CharField(max_length=1000, null=True, blank=True)
     season = models.ForeignKey(Season, on_delete=models.CASCADE)
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    avatar =  models.ImageField(upload_to='avatar/', null=True, blank=True)
 
 
     def __str__(self):
@@ -41,10 +42,14 @@ class Invite(models.Model):
         return str (self.email_address)
 
 class Player(models.Model):
-    #invite = models.ForeignKey(Invite, on_delete=models.CASCADE, related_name='player')
+    invite = models.ForeignKey(Invite, on_delete=models.CASCADE, related_name='player', null=True)
     league = models.ForeignKey(League, on_delete=models.CASCADE, related_name='player')
     name = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    avatar = models.ImageField(upload_to='static/golf_app/avatar/', null=True, blank=True)
+    avatar = models.ImageField(upload_to='avatar/', null=True, blank=True)
+    email = models.EmailField()
+
+    class Meta():
+        unique_together = ('league', 'name')
 
     def __str__(self):
         return str(self.name)
@@ -82,6 +87,7 @@ class Field(models.Model):
     tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE)
     group = models.ForeignKey(Group, on_delete=models.CASCADE, null=True)
     alternate = models.NullBooleanField(null=True)
+    withdrawn = models.BooleanField(default=False)
 
     class Meta:
         ordering = ['group', 'currentWGR']
@@ -129,19 +135,17 @@ class Picks(models.Model):
         return str(self.playerName) if self.playerName else ''
 
     def is_winner(self):
-        winner = ScoreDetails.objects.get(pick=self, score=1)
-
-        if (self.playerName == winner.pick.playerName and self.playerName.tournament.complete):
-           return True
+        if ScoreDetails.objects.filter(pick=self, score=1, pick__playerName__tournament__complete=True):
+            return True
         else:
-           return False
+            return False
 
 
 class ScoreDetails(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     pick = models.ForeignKey(Picks, on_delete=models.CASCADE, blank=True, null=True)
     score = models.PositiveIntegerField(null=True)
-    toPar = models.CharField(max_length=10, null=True)
+    toPar = models.CharField(max_length=30, null=True)
     today_score = models.CharField(max_length = 10, null=True)
     thru = models.CharField(max_length=100, null=True)
     sod_position = models.CharField(max_length=30, null=True)
@@ -172,3 +176,25 @@ class TotalScore(models.Model):
 
     def __str__(self):
         return str(self.user) + str(self.score)
+
+
+class mpScores(models.Model):
+    bracket = models.CharField(max_length=5)
+    round = models.FloatField()
+    match_num = models.CharField(max_length=5)
+    #pick = models.ForeignKey(Picks, on_delete=models.CASCADE, null=True, related_name='picks')
+    result = models.CharField(max_length=10)
+    score = models.CharField(max_length=10)
+    player = models.ForeignKey(Field, on_delete=models.CASCADE, related_name='player', null=True)
+
+    class Meta():
+        unique_together = ('player', 'round')
+
+    def __str__(self):
+        return str(self.round) + str(self.player.playerName) + self.result
+
+    def leader(self):
+        pass
+        #field = Field.objects.filter(group=self.player.group).values('playerName').annotate(Count('result'))
+        #print (field)
+        #return

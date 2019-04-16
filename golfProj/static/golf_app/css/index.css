@@ -1,16 +1,15 @@
-body {
-  margin: 0px;
-  padding: 0px;
+html, body {
+  margin: 0;
+  padding: 0;
   height: 100vh;
-  min-width: 100%;
+  width: 100%;
+
+
 }
 
-html {
-   margin: 0px;
-   height: 100%;
-   width: 100%;
+.row {
+  padding-left: 25px;
 }
-
 
 .backgroundimg {
   background-image: url('/static/golf_app/images/IMG_1412.JPG');
@@ -20,14 +19,28 @@ html {
   height: 60vh;
   width: 100%;
   color: black;
-  border: solid gray 2px;
+  /*border: solid gray 2px;*/
+
 
 }
+
+.leaderboard {
+  height: 240px;
+  width: 222px;
+  border-radius: 10px;
+  border-style: none;
+  border-color: black;
+  padding-left: 5px;
+}
+
+
 
 .pic {
   /*padding-left: 3px;*/
   height: 240px;
+  /*width: 222px;*/
   width: 222px;
+
   border-radius: 10px;
   border-style: solid;
   border-color: black;
@@ -40,7 +53,8 @@ html {
 }
 
 .white {
-  color: white
+  color: white;
+
 }
 
 .black {
@@ -51,7 +65,7 @@ html {
 .top-text {
   position: absolute;
   top: 0px;
-  left: 25%;
+  left: 3%;
   font-weight: bolder;
 }
 
@@ -69,12 +83,8 @@ html {
   font-weight: bold;
   text-align: center;
   border-radius: 5px;
-  padding-left: 10px;
+  padding-left: 30px;
 
-}
-
-.white-text {
-  color: white
 }
 
 /*tool tip section*/
