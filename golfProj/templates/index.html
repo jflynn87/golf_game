@@ -23,7 +23,7 @@
         {% if user == player.league.owner%}
         <div class="options">
             <a href="{% url 'golf_app:update_league' pk=player.league.pk %}">
-            <img class= "pic" src="{%static 'golf_app/images/group.jpg'%}" alt="background-color:#666;" />
+            <img class= "pic" src="{%static 'golf_app/images/group.jpg'%}" alt="{%static 'golf_app/images/group.JPG'%}" />
             <div class="top-text black">Update Group</div>
             <div class="bottom-text white">Update Group</div>
             </a>
