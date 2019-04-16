@@ -31,7 +31,7 @@
         {%elif player.player.invite.registered%}
         <div class="options">
             <a href="{% url 'golf_app:view_league' pk=player.league.pk %}">
-            <img class= "pic" src="{%static 'golf_app/images/group.jpg'%}" alt="background-color:#666;" />
+            <img class= "pic" src="{%static 'golf_app/images/group.jpg'%}" alt="{%static 'golf_app/images/group.JPG'%}" />
             <div class="top-text black">View Group</div>
             <div class="bottom-text white">View Group</div>
             </a>
@@ -39,7 +39,7 @@
         {%else%}
         <div class="options">
             <a href="{% url 'golf_app:create_league' %}">
-            <img class= "pic" src="{%static 'golf_app/images/group.jpg'%}" alt="background-color:#666;" />
+            <img class= "pic" src="{%static 'golf_app/images/group.jpg'%}" alt="{%static 'golf_app/images/group.JPG'%}" />
             <div class="top-text black">Create Group</div>
             <div class="bottom-text white">Create Group</div>
             </a>
