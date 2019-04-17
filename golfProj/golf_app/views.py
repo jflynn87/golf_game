@@ -48,6 +48,7 @@ class SignUp(CreateView):
     template_name = 'golf_app/signup.html'
 
     def get_context_data(self, **kwargs):
+
         if self.kwargs.get('token') != None:
             invite = Invite.objects.get(code=self.kwargs.get('token'))
             data = {'email': invite.email_address}
@@ -69,7 +70,8 @@ class SignUp(CreateView):
         context = super(SignUp, self).get_context_data(**kwargs)
         context.update({
         'form': form,
-        'player_form': player_form
+        'player_form': player_form,
+        'league': invite.league,
         })
 
         return context

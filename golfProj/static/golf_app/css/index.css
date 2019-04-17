@@ -2,7 +2,7 @@ html, body {
   margin: 0;
   padding: 0;
   height: 100vh;
-  width: 100%;
+  width: 110%;
 
 
 }
@@ -12,16 +12,20 @@ html, body {
 }
 
 .backgroundimg {
-  background-image: url('/static/golf_app/images/IMG_1412.JPG');
+  background-image: url('/static/golf_app/images/IMG_1440a.JPG');
   background-size: cover;
-  /*background-position: left right;*/
+  display: inline-block;
   background-repeat: no-repeat;
   height: 60vh;
-  width: 100%;
-  color: black;
+  width: 110%;
+
   /*border: solid gray 2px;*/
 
+}
 
+.white-border {
+  color: white;
+  text-shadow: 0px 0px 3px #000, -1px -1px #000, 1px 1px #000;
 }
 
 .leaderboard {
@@ -84,6 +88,7 @@ html, body {
   text-align: center;
   border-radius: 5px;
   padding-left: 30px;
+  /*width: 100%;*/
 
 }
 

@@ -21,13 +21,14 @@
 {% endif %}
 
 
-<div class="container">
+<div class="data">
 
-  <div class="jumbotron">
+  <div class="form">
     {%if registered %}
       <h3>Thank you for registering!</h3>
-      <a href="{% url 'login' %}"> <button class="btn btn-link">Click here to login</button></a></p>
+      <a href="{% url 'login' %}"> <button class="btn btn-link">Click here to login</button></a>
       {%else%}
+      <img src="{%static '/golf_app/'|add:league.avatar.url%}" width='20%' alt="">
       <h3>Golf Pick 'em Registration</h3>
       <br>
       <form method="post" enctype="multipart/form-data">

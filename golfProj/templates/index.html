@@ -6,17 +6,25 @@
 
 
 <div class="row backgroundimg">
-    <div class="xcontainer-fluid text-left white">
+    <div class="xcontainer-fluid white-border">
       <h1>{{user.username}} </h1>
         <h1>Welcome to Golf Pick 'em</h1>
       <h1>Group: {{player.league.league}}</h1>
     </div>
 </div>
-
+<br>
+{%if user.is_authenticated%}
 <div class="row gray">
     <p>Game Options - Please select an option below</p>
     <hr>
 </div>
+{%else%}
+<div class="row gray">
+    <p>To create a group, please register/login</p>
+    <hr>
+</div>
+{%endif%}
+
 
   <div class="row">
         {%if user.is_authenticated%}
@@ -95,8 +103,8 @@
         <div class="options">
             <a href="{% url 'login' %}">
             <img class= "pic" src="{%static 'golf_app/images/login.png'%}" alt="background-color:#666;" />
-            <div class="top-text black">login</div>
-            <div class="bottom-text black">login</div>
+            <div class="top-text black">register/login</div>
+            <div class="bottom-text black">register/login</div>
             </a>
         </div>
 
@@ -111,11 +119,17 @@
         {%endif%}
   </div>
 
-
+{%if user.is_authenticated%}
   <div class="row gray">
     <p class="text-center">Game Options - Please select an option above</p>
     <hr>
   </div>
+{%else%}
+<div class="row gray">
+  <p class="text-center">To create a group, please register/login</p>
+  <hr>
+</div>
+{%endif%}
 
 
 

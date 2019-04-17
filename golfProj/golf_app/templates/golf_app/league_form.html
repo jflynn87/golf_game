@@ -25,15 +25,16 @@
 {%if not form.instance.pk%}
 <h1>Create a Group</h1>
 {%else%}
-<h1>Update Group</h1>
+<h1>Update Group
+<img src="{%static '/golf_app/'|add:league.avatar.url%}" width='150' alt=""></h1>
 {%endif%}
 
 <form method="post" enctype="multipart/form-data">
 {%csrf_token%}
   {{form|bootstrap}}
 
-  <h3>Enter Email Addresses to invite frieds to join your group</h3>
-<p>Number of Invites:  <input id="email_cnt" type="text" name="" value="{{formset|length}}"</p>
+  <h3>Enter Email Addresses to invite friends to join your group</h3>
+<p>Additional Invites (only adds, should it reduce?):  <input id="email_cnt" type="text" name="" value="{{formset|length}}"</p>
 {%if form.instance.pk%}
   <button class= 'fas fa-envelope-square btn btn-primary btn-sm' type="button" name="button" onclick='send_email({{form.instance.pk}}, invite="all")'> Resend All Invites</button>
 {%endif%}
